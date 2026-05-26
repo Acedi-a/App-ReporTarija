@@ -41,6 +41,7 @@ export interface User {
   role: UserRole;
   area_id: number | null;
   is_active: boolean;
+  reputation_points: number;
   created_at: string;
   updated_at: string;
 }

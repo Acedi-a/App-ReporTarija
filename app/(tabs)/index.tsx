@@ -1,132 +1,273 @@
 // ============================================================
-// HomeScreen - Pantalla de inicio (placeholder)
-// Se implementará completamente en la próxima fase
+// HomeScreen - Pantalla de inicio del ciudadano
+// Muestra saludo, stats, botón nuevo reporte y reportes recientes
 // ============================================================
 
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, Text, StyleSheet, RefreshControl, ScrollView, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { ScreenContainer } from '@/src/shared/components/ui/ScreenContainer';
-import { Button } from '@/src/shared/components/ui/Button';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/src/shared/hooks/useAuth';
-import { Colors, FontSize, FontWeight, Spacing, Shadows, BorderRadius } from '@/src/shared/constants/theme';
+import { Button } from '@/src/shared/components/ui/Button';
+import { LoadingState } from '@/src/shared/components/ui/LoadingState';
+import { HomeHeader } from '@/src/features/home/components/HomeHeader';
+import { CitizenStatsCard } from '@/src/features/home/components/CitizenStatsCard';
+import { RecentReportsList } from '@/src/features/home/components/RecentReportsList';
+import { useHomeData } from '@/src/features/home/hooks/useHomeData';
+import type { Report } from '@/src/shared/types';
+import {
+  Colors,
+  FontSize,
+  FontWeight,
+  Spacing,
+  BorderRadius,
+  Shadows,
+} from '@/src/shared/constants/theme';
 
 export default function HomeScreen() {
   const { user, isDemo } = useAuth();
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+
+  const {
+    recentReports,
+    stats,
+    totalReports,
+    isLoading,
+    isRefreshing,
+    refresh,
+  } = useHomeData(user?.id);
+
+  function handleNewReport() {
+    router.push('/(tabs)/create');
+  }
+
+  function handleReportPress(report: Report) {
+    router.push({ pathname: '/report/[id]', params: { id: report.id } });
+  }
+
+  if (isLoading) {
+    return (
+      <View style={[styles.loadingContainer, { paddingTop: insets.top }]}>
+        <LoadingState message="Cargando tu actividad..." />
+      </View>
+    );
+  }
 
   return (
-    <ScreenContainer>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>¡Hola, {user?.full_name?.split(' ')[0] || 'Ciudadano'}! 👋</Text>
-          <Text style={styles.subtitle}>Bienvenido a ReporTarija</Text>
-        </View>
-        {isDemo && (
-          <View style={styles.demoBadge}>
-            <Text style={styles.demoBadgeText}>DEMO</Text>
-          </View>
-        )}
-      </View>
+    <ScrollView
+      style={[styles.container, { paddingTop: insets.top }]}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={refresh}
+          tintColor={Colors.primary}
+          colors={[Colors.primary]}
+        />
+      }
+    >
+      <View style={styles.content}>
+        {/* Header */}
+        <HomeHeader
+          userName={user?.full_name || 'Ciudadano'}
+          isDemo={isDemo}
+        />
 
-      <View style={styles.heroCard}>
-        <Ionicons name="megaphone" size={40} color={Colors.primary} />
-        <Text style={styles.heroTitle}>¿Ves un problema en tu ciudad?</Text>
-        <Text style={styles.heroDescription}>
-          Reporta baches, alumbrado dañado, basura acumulada y más. Tu reporte llegará al municipio.
-        </Text>
-        <Button
-          title="Nuevo Reporte"
-          onPress={() => {}}
-          icon={<Ionicons name="add-circle-outline" size={20} color={Colors.textInverse} />}
-          style={styles.heroButton}
+        {/* Botón Nuevo Reporte */}
+        <View style={styles.heroCard}>
+          <View style={styles.heroTop}>
+            <View style={styles.heroIconContainer}>
+              <Ionicons name="megaphone" size={28} color={Colors.textInverse} />
+            </View>
+            <View style={styles.heroTextContainer}>
+              <Text style={styles.heroTitle}>¿Ves un problema?</Text>
+              <Text style={styles.heroDescription}>
+                Reporta baches, alumbrado dañado, basura y más
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={styles.heroButton}
+            onPress={handleNewReport}
+            activeOpacity={0.9}
+          >
+            <Ionicons name="add" size={18} color="#0D9488" />
+            <Text style={styles.heroButtonText}>Nuevo reporte</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Accesos rápidos de categoría */}
+        <View style={styles.categoriesRow}>
+          <TouchableOpacity
+            style={styles.categoryBtn}
+            onPress={() => router.push({ pathname: '/(tabs)/create', params: { categoryId: '1' } })}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.categoryIconCircle, { backgroundColor: '#E6F4FE' }]}>
+              <Ionicons name="warning-outline" size={24} color="#2563EB" />
+            </View>
+            <Text style={styles.categoryBtnText}>Baches</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.categoryBtn}
+            onPress={() => router.push({ pathname: '/(tabs)/create', params: { categoryId: '2' } })}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.categoryIconCircle, { backgroundColor: '#FFFBEB' }]}>
+              <Ionicons name="bulb-outline" size={24} color="#D97706" />
+            </View>
+            <Text style={styles.categoryBtnText}>Alumbrado</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.categoryBtn}
+            onPress={() => router.push({ pathname: '/(tabs)/create', params: { categoryId: '3' } })}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.categoryIconCircle, { backgroundColor: '#F0FDF4' }]}>
+              <Ionicons name="trash-outline" size={24} color="#059669" />
+            </View>
+            <Text style={styles.categoryBtnText}>Basura</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.categoryBtn}
+            onPress={() => router.push({ pathname: '/(tabs)/create', params: { categoryId: '6' } })}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.categoryIconCircle, { backgroundColor: '#EEF2FF' }]}>
+              <Ionicons name="construct-outline" size={24} color="#4F46E5" />
+            </View>
+            <Text style={styles.categoryBtnText}>Obra pública</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Estadísticas */}
+        <CitizenStatsCard
+          stats={stats}
+          onVerTodos={() => router.push('/(tabs)/reports')}
+        />
+
+        {/* Reportes recientes */}
+        <RecentReportsList
+          reports={recentReports}
+          onReportPress={handleReportPress}
+          onVerTodos={() => router.push('/(tabs)/reports')}
         />
       </View>
-
-      <Text style={styles.sectionTitle}>Próximamente</Text>
-      <View style={styles.placeholderCard}>
-        <Ionicons name="bar-chart-outline" size={24} color={Colors.textMuted} />
-        <Text style={styles.placeholderText}>
-          Aquí verás el resumen de tus reportes y actividad reciente
-        </Text>
-      </View>
-    </ScreenContainer>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: Spacing.lg,
-    marginBottom: Spacing['2xl'],
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
   },
-  greeting: {
-    fontSize: FontSize['2xl'],
-    fontWeight: FontWeight.bold,
-    color: Colors.textPrimary,
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: Spacing['4xl'],
   },
-  subtitle: {
-    fontSize: FontSize.sm,
-    color: Colors.textMuted,
-    marginTop: 2,
+  content: {
+    paddingHorizontal: Spacing.xl,
   },
-  demoBadge: {
-    backgroundColor: Colors.warningLight,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.full,
-  },
-  demoBadgeText: {
-    fontSize: FontSize.xs,
-    fontWeight: FontWeight.bold,
-    color: Colors.warning,
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: Colors.background,
   },
   heroCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.xl,
-    padding: Spacing['2xl'],
+    backgroundColor: '#0D9488',
+    borderRadius: 24,
+    padding: Spacing.xl,
+    marginBottom: Spacing.xl,
+    gap: Spacing.md,
+    shadowColor: '#0D9488',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  heroTop: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing['2xl'],
-    ...Shadows.md,
+    gap: Spacing.md,
+  },
+  heroIconContainer: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heroTextContainer: {
+    flex: 1,
   },
   heroTitle: {
-    fontSize: FontSize.lg,
+    fontSize: 20,
     fontWeight: FontWeight.bold,
-    color: Colors.textPrimary,
-    textAlign: 'center',
-    marginTop: Spacing.md,
+    color: Colors.textInverse,
   },
   heroDescription: {
     fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    marginTop: Spacing.sm,
-    lineHeight: 20,
-    marginBottom: Spacing.xl,
+    color: 'rgba(255,255,255,0.9)',
+    marginTop: 2,
+    lineHeight: 18,
   },
   heroButton: {
-    width: '100%',
-  },
-  sectionTitle: {
-    fontSize: FontSize.lg,
-    fontWeight: FontWeight.semibold,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.md,
-  },
-  placeholderCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing['2xl'],
+    backgroundColor: '#FFFFFF',
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md - 2,
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderStyle: 'dashed',
+    alignSelf: 'flex-start',
+    gap: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  placeholderText: {
+  heroButtonText: {
+    color: '#0D9488',
+    fontWeight: FontWeight.bold,
     fontSize: FontSize.sm,
-    color: Colors.textMuted,
-    textAlign: 'center',
+  },
+  categoriesRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.xl,
+    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.02)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  categoryBtn: {
+    flex: 1,
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  categoryIconCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  categoryBtnText: {
+    fontSize: 11,
+    fontWeight: FontWeight.semibold,
+    color: Colors.textSecondary,
   },
 });

@@ -1,15 +1,7 @@
-// ============================================================
-// Auth Service - Servicio de autenticación
-// Conecta con InsForge Auth + tabla users
-// Incluye modo demo para pruebas rápidas
-// ============================================================
 
 import { insforge } from '../../../lib/insforge';
 import type { User } from '../../../shared/types';
 
-// ============================================================
-// Datos demo para pruebas sin conexión real
-// ============================================================
 
 const DEMO_USER: User = {
   id: '7a10e1bb-4b8f-4ead-80ce-2ddd78453964',
@@ -19,20 +11,13 @@ const DEMO_USER: User = {
   role: 'CITIZEN',
   area_id: null,
   is_active: true,
+  reputation_points: 120,
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 };
 
-// ============================================================
-// Funciones del servicio
-// ============================================================
 
-/**
- * Iniciar sesión con correo y contraseña.
- * Primero autentica con InsForge Auth, luego busca el usuario en la tabla users.
- */
 export async function login(email: string, password: string): Promise<User> {
-  // Autenticar con InsForge Auth
   const { data: authData, error: authError } = await insforge.auth.signInWithPassword({
     email,
     password,
@@ -46,7 +31,6 @@ export async function login(email: string, password: string): Promise<User> {
     throw new Error('No se pudo obtener la información del usuario');
   }
 
-  // Buscar el usuario en la tabla users por email
   const { data: users, error: dbError } = await insforge.database
     .from('users')
     .select()
@@ -63,7 +47,6 @@ export async function login(email: string, password: string): Promise<User> {
 
   const user = users[0] as User;
 
-  // Verificar que sea ciudadano activo
   if (!user.is_active) {
     throw new Error('Tu cuenta ha sido desactivada');
   }
@@ -71,18 +54,13 @@ export async function login(email: string, password: string): Promise<User> {
   return user;
 }
 
-/**
- * Registrar un nuevo ciudadano.
- * 1. Crea la cuenta en InsForge Auth
- * 2. Crea el registro en la tabla users con rol CITIZEN
- */
+
 export async function register(
   fullName: string,
   email: string,
   phone: string | undefined,
   password: string,
 ): Promise<User> {
-  // 1. Registrar en InsForge Auth
   const { data: authData, error: authError } = await insforge.auth.signUp({
     email,
     password,
@@ -98,7 +76,6 @@ export async function register(
     throw new Error('No se pudo crear la cuenta');
   }
 
-  // 2. Crear registro en la tabla users
   const newUser = {
     id: authData.user.id,
     full_name: fullName,
@@ -115,10 +92,10 @@ export async function register(
 
   if (dbError) {
     console.error('Error al crear perfil en DB:', dbError);
-    // Si falla la DB pero el auth se creó, devolver datos básicos
     return {
       ...newUser,
       area_id: null,
+      reputation_points: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -127,14 +104,12 @@ export async function register(
   return (createdUsers?.[0] as User) || {
     ...newUser,
     area_id: null,
+    reputation_points: 0,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
 }
 
-/**
- * Cerrar sesión
- */
 export async function logout(): Promise<void> {
   const { error } = await insforge.auth.signOut();
   if (error) {
@@ -142,9 +117,7 @@ export async function logout(): Promise<void> {
   }
 }
 
-/**
- * Obtener el usuario actual autenticado
- */
+
 export async function getCurrentUser(): Promise<User | null> {
   try {
     const { data: authData } = await insforge.auth.getCurrentUser();
@@ -153,7 +126,6 @@ export async function getCurrentUser(): Promise<User | null> {
       return null;
     }
 
-    // Buscar en tabla users
     const { data: users } = await insforge.database
       .from('users')
       .select()
@@ -170,11 +142,7 @@ export async function getCurrentUser(): Promise<User | null> {
   }
 }
 
-/**
- * Acceso demo - devuelve el usuario ciudadano demo sin autenticación real
- */
 export async function loginDemo(): Promise<User> {
-  // Intentar obtener el usuario demo de la DB
   try {
     const { data: users } = await insforge.database
       .from('users')
@@ -185,8 +153,8 @@ export async function loginDemo(): Promise<User> {
     if (users && users.length > 0) {
       return users[0] as User;
     }
-  } catch {
-    // Si falla la conexión, devolver datos locales
+  } catch (error) {
+    console.error('Error al iniciar sesión en modo demo:', error);
   }
 
   return DEMO_USER;

@@ -64,7 +64,7 @@ export function ScreenContainer({
   return (
     <KeyboardAvoidingView
       style={[containerStyle, style]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={0}
     >
       {content}
