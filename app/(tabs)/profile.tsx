@@ -1,54 +1,33 @@
-// ============================================================
-// ProfileScreen - Pantalla de perfil básico con logout
-// ============================================================
-
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { ScreenContainer } from '@/src/shared/components/ui/ScreenContainer';
 import { Button } from '@/src/shared/components/ui/Button';
+import { ScreenContainer } from '@/src/shared/components/ui/ScreenContainer';
+import { getUserRank } from '@/src/shared/constants/reputation';
+import { BorderRadius, Colors, FontSize, FontWeight, Shadows, Spacing } from '@/src/shared/constants/theme';
 import { useAuth } from '@/src/shared/hooks/useAuth';
-import { Colors, FontSize, FontWeight, Spacing, Shadows, BorderRadius } from '@/src/shared/constants/theme';
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 export default function ProfileScreen() {
   const { user, isDemo, logout } = useAuth();
 
   const points = user?.reputation_points || 0;
-  let rankName = 'Vecino Observador';
-  let rankColor: string = Colors.primary;
-  let rankIcon = 'eye-outline';
-
-  if (points >= 300) {
-    rankName = 'Héroe Urbano';
-    rankColor = '#10B981'; // Verde
-    rankIcon = 'trophy-outline';
-  } else if (points >= 150) {
-    rankName = 'Guardián de Tarija';
-    rankColor = '#8B5CF6'; // Morado
-    rankIcon = 'shield-half-outline';
-  } else if (points >= 50) {
-    rankName = 'Vecino Activo';
-    rankColor = '#3B82F6'; // Azul
-    rankIcon = 'checkmark-circle-outline';
-  }
+  const rank = getUserRank(points);
 
   return (
     <ScreenContainer>
       <Text style={styles.screenTitle}>Mi Perfil</Text>
 
-      {/* Avatar + Nombre */}
       <View style={styles.profileCard}>
         <View style={styles.avatar}>
           <Ionicons name="person" size={40} color={Colors.primary} />
         </View>
         <Text style={styles.userName}>{user?.full_name || 'Ciudadano'}</Text>
         <Text style={styles.userEmail}>{user?.email || ''}</Text>
-        
-        {/* Rango y Reputación */}
+
         <View style={styles.rankContainer}>
-          <View style={[styles.rankBadge, { backgroundColor: rankColor + '15' }]}>
-            <Ionicons name={rankIcon as any} size={14} color={rankColor} />
-            <Text style={[styles.rankText, { color: rankColor }]}>{rankName}</Text>
+          <View style={[styles.rankBadge, { backgroundColor: rank.color + '15' }]}>
+            <Ionicons name={rank.icon} size={14} color={rank.color} />
+            <Text style={[styles.rankText, { color: rank.color }]}>{rank.name}</Text>
           </View>
           <Text style={styles.pointsText}>{points} pts de reputación</Text>
         </View>
@@ -59,8 +38,6 @@ export default function ProfileScreen() {
           </View>
         )}
       </View>
-
-      {/* Info */}
       <View style={styles.infoCard}>
         <View style={styles.infoRow}>
           <Ionicons name="mail-outline" size={20} color={Colors.textMuted} />
@@ -87,7 +64,6 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* Logout */}
       <Button
         title="Cerrar sesión"
         onPress={logout}
