@@ -2,22 +2,31 @@
 // useHomeData - Custom Hook de negocio para la pantalla principal
 // Encapsula fetching y cálculo de estadísticas
 // ============================================================
+// Refactorizaciones aplicadas:
+//   - Dispensable: Eliminada variable totalReports (DI-H01)
+//     Se declaraba, calculaba y retornaba pero nunca se usaba
+//     en HomeScreen. Código muerto eliminado.
+// ============================================================
 
 import { useState, useEffect, useCallback } from 'react';
 import * as reportService from '../../../features/reports/services/reportService';
 import type { Report, ReportStatus } from '../../../shared/types';
 
+const INITIAL_STATS: Record<ReportStatus, number> = {
+  PENDIENTE: 0,
+  EN_REVISION: 0,
+  ASIGNADO: 0,
+  EN_PROCESO: 0,
+  RESUELTO: 0,
+  RECHAZADO: 0,
+};
+
+/** Cantidad de reportes recientes a mostrar en Home */
+const RECENT_REPORTS_LIMIT = 5;
+
 export function useHomeData(userId: string | undefined) {
   const [recentReports, setRecentReports] = useState<Report[]>([]);
-  const [stats, setStats] = useState<Record<ReportStatus, number>>({
-    PENDIENTE: 0,
-    EN_REVISION: 0,
-    ASIGNADO: 0,
-    EN_PROCESO: 0,
-    RESUELTO: 0,
-    RECHAZADO: 0,
-  });
-  const [totalReports, setTotalReports] = useState(0);
+  const [stats, setStats] = useState<Record<ReportStatus, number>>(INITIAL_STATS);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -26,16 +35,12 @@ export function useHomeData(userId: string | undefined) {
 
     try {
       const [reportsData, statsData] = await Promise.all([
-        reportService.getRecentReports(userId, 5),
+        reportService.getRecentReports(userId, RECENT_REPORTS_LIMIT),
         reportService.getReportStats(userId),
       ]);
 
       setRecentReports(reportsData);
       setStats(statsData);
-
-      // Calcular total
-      const total = Object.values(statsData).reduce((sum, count) => sum + count, 0);
-      setTotalReports(total);
     } catch (error) {
       console.error('Error al cargar datos del home:', error);
     } finally {
@@ -56,7 +61,6 @@ export function useHomeData(userId: string | undefined) {
   return {
     recentReports,
     stats,
-    totalReports,
     isLoading,
     isRefreshing,
     refresh,

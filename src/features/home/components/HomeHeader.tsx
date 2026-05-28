@@ -31,7 +31,7 @@ export function HomeHeader({ userName, isDemo }: HomeHeaderProps) {
         )}
         <View style={styles.avatarOuter}>
           <View style={styles.avatarContainer}>
-            <Ionicons name="person" size={22} color="#0D9488" />
+            <Ionicons name="person" size={22} color={Colors.primary} />
           </View>
         </View>
       </View>

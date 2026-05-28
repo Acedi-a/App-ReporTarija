@@ -31,7 +31,7 @@ export function CitizenStatsCard({ stats, onVerTodos }: CitizenStatsCardProps) {
         {onVerTodos && (
           <TouchableOpacity onPress={onVerTodos} style={styles.linkButton} activeOpacity={0.7}>
             <Text style={styles.linkText}>Ver todos</Text>
-            <Ionicons name="chevron-forward" size={14} color="#0D9488" />
+            <Ionicons name="chevron-forward" size={14} color={Colors.primary} />
           </TouchableOpacity>
         )}
       </View>
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: FontSize.xs,
     fontWeight: FontWeight.semibold,
-    color: '#0D9488',
+    color: Colors.primary,
   },
   grid: {
     flexDirection: 'row',
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 9,
     fontWeight: FontWeight.semibold,
-    color: '#4B5563',
+    color: Colors.textSecondary,
   },
   count: {
     fontSize: FontSize.md,

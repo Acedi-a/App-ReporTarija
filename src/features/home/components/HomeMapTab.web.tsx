@@ -1,29 +1,51 @@
+// ============================================================
+// HomeMapTab (Web) - Vista de mapa con OpenStreetMap iframe
+// Refactorizaciones aplicadas:
+//   - Extract Component: MapReportPreviewCard (CO-H01)
+//   - Eliminación de estilos duplicados (~50 líneas)
+//   - Replace Magic Number: coordenadas Tarija como constante
+// ============================================================
+
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import type { Report } from '../../../shared/types';
 import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '../../../shared/constants/theme';
-import { ReportStatusBadge } from '../../reports/components/ReportStatusBadge';
+import { MapReportPreviewCard } from './MapReportPreviewCard';
+
+/** Coordenadas por defecto de Tarija, Bolivia */
+const TARIJA_DEFAULT_LAT = -21.5355;
+const TARIJA_DEFAULT_LNG = -64.7296;
+const MAP_BBOX_OFFSET = 0.005;
+const MAP_HEIGHT = 320;
 
 interface HomeMapTabProps {
   reports: Report[];
 }
 
-export function HomeMapTab({ reports }: HomeMapTabProps) {
-  const router = useRouter();
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-
-  // Filtrar reportes que tengan lat y lng válidos
-  const reportsWithCoords = reports.filter(
-    (r) => r.latitude !== null && r.longitude !== null
+/** Filtra reportes que tengan coordenadas válidas */
+function filterGeolocatedReports(reports: Report[]): Report[] {
+  return reports.filter(
+    (report) => report.latitude !== null && report.longitude !== null
   );
+}
 
-  const activeLat = selectedReport ? Number(selectedReport.latitude) : -21.5355;
-  const activeLng = selectedReport ? Number(selectedReport.longitude) : -64.7296;
+/** Genera la URL del embed de OpenStreetMap */
+function buildOsmEmbedUrl(latitude: number, longitude: number): string {
+  const west = longitude - MAP_BBOX_OFFSET;
+  const south = latitude - MAP_BBOX_OFFSET;
+  const east = longitude + MAP_BBOX_OFFSET;
+  const north = latitude + MAP_BBOX_OFFSET;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${west}%2C${south}%2C${east}%2C${north}&layer=mapnik&marker=${latitude}%2C${longitude}`;
+}
 
-  // OpenStreetMap embed URL
-  const osmEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${activeLng - 0.005}%2C${activeLat - 0.005}%2C${activeLng + 0.005}%2C${activeLat + 0.005}&layer=mapnik&marker=${activeLat}%2C${activeLng}`;
+export function HomeMapTab({ reports }: HomeMapTabProps) {
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const reportsWithCoords = filterGeolocatedReports(reports);
+
+  const activeLat = selectedReport ? Number(selectedReport.latitude) : TARIJA_DEFAULT_LAT;
+  const activeLng = selectedReport ? Number(selectedReport.longitude) : TARIJA_DEFAULT_LNG;
+  const osmEmbedUrl = buildOsmEmbedUrl(activeLat, activeLng);
 
   return (
     <View style={styles.container}>
@@ -43,10 +65,7 @@ export function HomeMapTab({ reports }: HomeMapTabProps) {
             return (
               <TouchableOpacity
                 key={report.id}
-                style={[
-                  styles.reportChip,
-                  isSelected && styles.reportChipSelected,
-                ]}
+                style={[styles.reportChip, isSelected && styles.reportChipSelected]}
                 onPress={() => setSelectedReport(report)}
               >
                 <Ionicons
@@ -55,10 +74,7 @@ export function HomeMapTab({ reports }: HomeMapTabProps) {
                   color={isSelected ? Colors.surface : Colors.primary}
                 />
                 <Text
-                  style={[
-                    styles.reportChipText,
-                    isSelected && styles.reportChipTextSelected,
-                  ]}
+                  style={[styles.reportChipText, isSelected && styles.reportChipTextSelected]}
                   numberOfLines={1}
                 >
                   {report.title}
@@ -73,48 +89,12 @@ export function HomeMapTab({ reports }: HomeMapTabProps) {
       <View style={styles.mapWrapper}>
         <iframe
           src={osmEmbedUrl}
-          style={{
-            width: '100%',
-            height: '100%',
-            border: 'none',
-          }}
+          style={{ width: '100%', height: '100%', border: 'none' }}
           title="Mapa de reportes"
         />
       </View>
 
-      {/* Tarjeta inferior de reporte seleccionado */}
-      {selectedReport && (
-        <TouchableOpacity
-          style={styles.previewCard}
-          activeOpacity={0.9}
-          onPress={() =>
-            router.push({
-              pathname: '/report/[id]',
-              params: { id: selectedReport.id },
-            })
-          }
-        >
-          <View style={styles.cardHeader}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle} numberOfLines={1}>
-                {selectedReport.title}
-              </Text>
-              <Text style={styles.cardAddress} numberOfLines={1}>
-                📍 {selectedReport.neighborhood || 'Barrio no especificado'},{' '}
-                {selectedReport.address || 'Sin dirección'}
-              </Text>
-            </View>
-            <ReportStatusBadge status={selectedReport.status} />
-          </View>
-          <Text style={styles.cardDescription} numberOfLines={2}>
-            {selectedReport.description}
-          </Text>
-          <View style={styles.cardFooter}>
-            <Text style={styles.cardFooterText}>Toca para ver detalle completo</Text>
-            <Ionicons name="arrow-forward" size={16} color={Colors.primary} />
-          </View>
-        </TouchableOpacity>
-      )}
+      {selectedReport && <MapReportPreviewCard report={selectedReport} />}
     </View>
   );
 }
@@ -162,57 +142,12 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.bold,
   },
   mapWrapper: {
-    height: 320,
+    height: MAP_HEIGHT,
     borderRadius: BorderRadius.xl,
     borderWidth: 1.5,
     borderColor: Colors.border,
     overflow: 'hidden',
     backgroundColor: '#F1F5F9',
     ...Shadows.sm,
-  },
-  previewCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
-    ...Shadows.md,
-    marginTop: Spacing.xs,
-    gap: Spacing.xs,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: Spacing.sm,
-  },
-  cardTitle: {
-    fontSize: FontSize.sm + 1,
-    fontWeight: FontWeight.bold,
-    color: Colors.textPrimary,
-  },
-  cardAddress: {
-    fontSize: FontSize.xs,
-    color: Colors.textSecondary,
-    marginTop: 2,
-  },
-  cardDescription: {
-    fontSize: FontSize.xs,
-    color: Colors.textMuted,
-    lineHeight: 16,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopWidth: 1,
-    borderTopColor: Colors.borderLight,
-    paddingTop: Spacing.sm,
-    marginTop: Spacing.xs,
-  },
-  cardFooterText: {
-    fontSize: FontSize.xs,
-    color: Colors.primary,
-    fontWeight: FontWeight.bold,
   },
 });

@@ -1,24 +1,41 @@
+// ============================================================
+// HomeMapTab (Native) - Vista de mapa con react-native-maps
+// Refactorizaciones aplicadas:
+//   - Extract Component: MapReportPreviewCard (CO-H01)
+//   - Decompose Conditional: getStatusConfig reemplaza if/else (OA-H01)
+//   - Eliminación de estilos duplicados (~50 líneas)
+// ============================================================
+
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { View, Text, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import type { Report } from '../../../shared/types';
 import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '../../../shared/constants/theme';
-import { ReportStatusBadge } from '../../reports/components/ReportStatusBadge';
+import { getStatusConfig } from '../../../shared/constants/reportStatus';
+import { MapReportPreviewCard } from './MapReportPreviewCard';
+
+/** Coordenadas por defecto de Tarija, Bolivia */
+const TARIJA_DEFAULT_COORDS = {
+  latitude: -21.5355,
+  longitude: -64.7296,
+  latitudeDelta: 0.03,
+  longitudeDelta: 0.03,
+};
 
 interface HomeMapTabProps {
   reports: Report[];
 }
 
-export function HomeMapTab({ reports }: HomeMapTabProps) {
-  const router = useRouter();
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-
-  // Filtrar reportes que tengan lat y lng válidos
-  const reportsWithCoords = reports.filter(
-    (r) => r.latitude !== null && r.longitude !== null
+/** Filtra reportes que tengan coordenadas válidas */
+function filterGeolocatedReports(reports: Report[]): Report[] {
+  return reports.filter(
+    (report) => report.latitude !== null && report.longitude !== null
   );
+}
+
+export function HomeMapTab({ reports }: HomeMapTabProps) {
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const reportsWithCoords = filterGeolocatedReports(reports);
 
   return (
     <View style={styles.container}>
@@ -26,35 +43,28 @@ export function HomeMapTab({ reports }: HomeMapTabProps) {
         Mostrando {reportsWithCoords.length} reportes geolocalizados en Tarija
       </Text>
 
-      {/* Contenedor del Mapa Real */}
       <View style={styles.mapWrapper}>
         <MapView
           style={styles.map}
-          initialRegion={{
-            latitude: -21.5355,
-            longitude: -64.7296,
-            latitudeDelta: 0.03,
-            longitudeDelta: 0.03,
-          }}
+          initialRegion={TARIJA_DEFAULT_COORDS}
           onPress={() => setSelectedReport(null)}
         >
           {reportsWithCoords.map((report) => {
-            const lat = Number(report.latitude);
-            const lng = Number(report.longitude);
-
-            // Asignar color de pin según estado
-            let pinColor: string = Colors.primary;
-            if (report.status === 'RESUELTO') pinColor = Colors.success;
-            else if (report.status === 'EN_PROCESO') pinColor = '#3B82F6';
-            else if (report.status === 'PENDIENTE') pinColor = '#F59E0B';
+            // Refactorización: Decompose Conditional (OA-H01)
+            // Antes: cadena de if/else con colores hardcodeados
+            // Ahora: usa getStatusConfig() que ya existe
+            const statusConfig = getStatusConfig(report.status);
 
             return (
               <Marker
                 key={report.id}
-                coordinate={{ latitude: lat, longitude: lng }}
+                coordinate={{
+                  latitude: Number(report.latitude),
+                  longitude: Number(report.longitude),
+                }}
                 title={report.title}
                 description={report.neighborhood || undefined}
-                pinColor={pinColor}
+                pinColor={statusConfig.color}
                 onPress={(e) => {
                   e.stopPropagation();
                   setSelectedReport(report);
@@ -65,42 +75,12 @@ export function HomeMapTab({ reports }: HomeMapTabProps) {
         </MapView>
       </View>
 
-      {/* Tarjeta inferior de reporte seleccionado */}
-      {selectedReport && (
-        <TouchableOpacity
-          style={styles.previewCard}
-          activeOpacity={0.9}
-          onPress={() =>
-            router.push({
-              pathname: '/report/[id]',
-              params: { id: selectedReport.id },
-            })
-          }
-        >
-          <View style={styles.cardHeader}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle} numberOfLines={1}>
-                {selectedReport.title}
-              </Text>
-              <Text style={styles.cardAddress} numberOfLines={1}>
-                📍 {selectedReport.neighborhood || 'Barrio no especificado'},{' '}
-                {selectedReport.address || 'Sin dirección'}
-              </Text>
-            </View>
-            <ReportStatusBadge status={selectedReport.status} />
-          </View>
-          <Text style={styles.cardDescription} numberOfLines={2}>
-            {selectedReport.description}
-          </Text>
-          <View style={styles.cardFooter}>
-            <Text style={styles.cardFooterText}>Toca para ver detalle completo</Text>
-            <Ionicons name="arrow-forward" size={16} color={Colors.primary} />
-          </View>
-        </TouchableOpacity>
-      )}
+      {selectedReport && <MapReportPreviewCard report={selectedReport} />}
     </View>
   );
 }
+
+const MAP_HEIGHT = 320;
 
 const styles = StyleSheet.create({
   container: {
@@ -114,7 +94,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   mapWrapper: {
-    height: 320,
+    height: MAP_HEIGHT,
     borderRadius: BorderRadius.xl,
     borderWidth: 1.5,
     borderColor: Colors.border,
@@ -125,50 +105,5 @@ const styles = StyleSheet.create({
   map: {
     width: '100%',
     height: '100%',
-  },
-  previewCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
-    ...Shadows.md,
-    marginTop: Spacing.xs,
-    gap: Spacing.xs,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: Spacing.sm,
-  },
-  cardTitle: {
-    fontSize: FontSize.sm + 1,
-    fontWeight: FontWeight.bold,
-    color: Colors.textPrimary,
-  },
-  cardAddress: {
-    fontSize: FontSize.xs,
-    color: Colors.textSecondary,
-    marginTop: 2,
-  },
-  cardDescription: {
-    fontSize: FontSize.xs,
-    color: Colors.textMuted,
-    lineHeight: 16,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopWidth: 1,
-    borderTopColor: Colors.borderLight,
-    paddingTop: Spacing.sm,
-    marginTop: Spacing.xs,
-  },
-  cardFooterText: {
-    fontSize: FontSize.xs,
-    color: Colors.primary,
-    fontWeight: FontWeight.bold,
   },
 });
