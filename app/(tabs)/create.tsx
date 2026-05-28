@@ -8,17 +8,13 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
   Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/src/shared/hooks/useAuth';
-import { createReportSchema, type CreateReportFormData } from '@/src/lib/validations';
+import { createReportSchema, type CreateReportFormData, MIN_REPORT_DESCRIPTION_LENGTH } from '@/src/lib/validations';
 import { createReport } from '@/src/features/reports/services/reportService';
 import { uploadEvidence } from '@/src/features/evidence/services/evidenceService';
 import { Button } from '@/src/shared/components/ui/Button';
@@ -27,13 +23,12 @@ import { ScreenContainer } from '@/src/shared/components/ui/ScreenContainer';
 import { CategorySelector } from '@/src/features/reports/components/CategorySelector';
 import { LocationPicker } from '@/src/features/reports/components/LocationPicker';
 import { EvidenceUploader } from '@/src/features/reports/components/EvidenceUploader';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius } from '@/src/shared/constants/theme';
+import { Colors, FontSize, FontWeight, Spacing } from '@/src/shared/constants/theme';
 
 export default function CreateReportScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const params = useLocalSearchParams<{ categoryId?: string }>();
-  const insets = useSafeAreaInsets();
   const [submitting, setSubmitting] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
 
@@ -45,6 +40,7 @@ export default function CreateReportScreen() {
     handleSubmit,
     setValue,
     reset,
+    watch,
     formState: { errors },
   } = useForm<CreateReportFormData>({
     resolver: zodResolver(createReportSchema),
@@ -56,6 +52,15 @@ export default function CreateReportScreen() {
       neighborhood: '',
     },
   });
+
+  const watchDescription = watch('description', '');
+  const watchTitle = watch('title', '');
+  const watchCategory = watch('category_id');
+
+  const isFormInvalid =
+    watchTitle.length < 5 ||
+    watchDescription.length < MIN_REPORT_DESCRIPTION_LENGTH ||
+    !watchCategory;
 
   useEffect(() => {
     if (params.categoryId) {
@@ -157,17 +162,41 @@ export default function CreateReportScreen() {
         <Controller
           control={control}
           name="description"
-          render={({ field: { onChange, value } }) => (
-            <Input
-              label="Descripción *"
-              placeholder="Describe la situación en detalle (mínimo 20 caracteres)"
-              value={value}
-              onChangeText={onChange}
-              multiline
-              numberOfLines={4}
-              error={errors.description?.message}
-            />
-          )}
+          render={({ field: { onChange, value } }) => {
+            const charCount = value ? value.length : 0;
+            const isValid = charCount >= MIN_REPORT_DESCRIPTION_LENGTH;
+            return (
+              <View>
+                <Input
+                  label="Descripción *"
+                  placeholder="Describe la situación en detalle (mínimo 20 caracteres)"
+                  value={value}
+                  onChangeText={onChange}
+                  multiline
+                  numberOfLines={4}
+                  error={errors.description?.message}
+                  containerStyle={{ marginBottom: 4 }}
+                />
+                <View style={styles.charCounterContainer}>
+                  <Text
+                    style={[
+                      styles.charCounterText,
+                      isValid ? styles.charCounterValid : styles.charCounterInvalid,
+                    ]}
+                  >
+                    {charCount} / {MIN_REPORT_DESCRIPTION_LENGTH} caracteres mínimos
+                  </Text>
+                  {isValid ? (
+                    <Text style={styles.charCounterValidText}>✓ Válido</Text>
+                  ) : (
+                    <Text style={styles.charCounterInvalidText}>
+                      Faltan {MIN_REPORT_DESCRIPTION_LENGTH - charCount}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            );
+          }}
         />
 
         {/* Selector de Categoría */}
@@ -213,6 +242,7 @@ export default function CreateReportScreen() {
           title={submitting ? 'Enviando reporte...' : 'Registrar Reporte'}
           onPress={handleSubmit(onSubmit)}
           loading={submitting}
+          disabled={isFormInvalid}
           style={styles.submitButton}
         />
       </View>
@@ -244,5 +274,32 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     marginTop: Spacing.md,
+  },
+  charCounterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: -8,
+    marginBottom: Spacing.md,
+    paddingHorizontal: 4,
+  },
+  charCounterText: {
+    fontSize: FontSize.xs,
+    fontWeight: FontWeight.medium,
+  },
+  charCounterValid: {
+    color: Colors.success,
+  },
+  charCounterInvalid: {
+    color: Colors.textMuted,
+  },
+  charCounterValidText: {
+    fontSize: FontSize.xs,
+    fontWeight: FontWeight.bold,
+    color: Colors.success,
+  },
+  charCounterInvalidText: {
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
   },
 });

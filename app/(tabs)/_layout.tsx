@@ -8,9 +8,11 @@ import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, FontSize, FontWeight } from '@/src/shared/constants/theme';
+import { useNotifications } from '@/src/shared/hooks/useNotifications';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  const { unreadCount } = useNotifications();
 
   return (
     <Tabs
@@ -66,6 +68,12 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="notifications" size={size} color={color} />
           ),
+          tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: Colors.error,
+            color: Colors.textInverse,
+            fontSize: 10,
+          },
         }}
       />
       <Tabs.Screen
@@ -80,3 +88,4 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+

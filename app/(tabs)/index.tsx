@@ -3,17 +3,18 @@
 // Muestra saludo, stats, botón nuevo reporte y reportes recientes
 // ============================================================
 
-import React, { useCallback } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, RefreshControl, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/src/shared/hooks/useAuth';
-import { Button } from '@/src/shared/components/ui/Button';
 import { LoadingState } from '@/src/shared/components/ui/LoadingState';
 import { HomeHeader } from '@/src/features/home/components/HomeHeader';
 import { CitizenStatsCard } from '@/src/features/home/components/CitizenStatsCard';
 import { RecentReportsList } from '@/src/features/home/components/RecentReportsList';
+// eslint-disable-next-line import/no-unresolved
+import { HomeMapTab } from '@/src/features/home/components/HomeMapTab';
 import { useHomeData } from '@/src/features/home/hooks/useHomeData';
 import type { Report } from '@/src/shared/types';
 import {
@@ -33,11 +34,12 @@ export default function HomeScreen() {
   const {
     recentReports,
     stats,
-    totalReports,
     isLoading,
     isRefreshing,
     refresh,
   } = useHomeData(user?.id);
+
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   function handleNewReport() {
     router.push('/(tabs)/create');
@@ -152,12 +154,67 @@ export default function HomeScreen() {
           onVerTodos={() => router.push('/(tabs)/reports')}
         />
 
-        {/* Reportes recientes */}
-        <RecentReportsList
-          reports={recentReports}
-          onReportPress={handleReportPress}
-          onVerTodos={() => router.push('/(tabs)/reports')}
-        />
+        {/* Selector de Vista (Lista / Mapa) */}
+        <View style={[styles.viewSelectorContainer, viewMode === 'list' && { justifyContent: 'flex-end', marginBottom: Spacing.sm }]}>
+          {viewMode === 'map' && <Text style={styles.sectionTitle}>Mapa de Reportes</Text>}
+          <View style={styles.segmentedControl}>
+            <TouchableOpacity
+              style={[
+                styles.segmentButton,
+                viewMode === 'list' && styles.segmentButtonActive,
+              ]}
+              onPress={() => setViewMode('list')}
+              activeOpacity={0.8}
+            >
+              <Ionicons
+                name="list"
+                size={16}
+                color={viewMode === 'list' ? Colors.textInverse : Colors.textSecondary}
+              />
+              <Text
+                style={[
+                  styles.segmentButtonText,
+                  viewMode === 'list' && styles.segmentButtonTextActive,
+                ]}
+              >
+                Lista
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.segmentButton,
+                viewMode === 'map' && styles.segmentButtonActive,
+              ]}
+              onPress={() => setViewMode('map')}
+              activeOpacity={0.8}
+            >
+              <Ionicons
+                name="map"
+                size={16}
+                color={viewMode === 'map' ? Colors.textInverse : Colors.textSecondary}
+              />
+              <Text
+                style={[
+                  styles.segmentButtonText,
+                  viewMode === 'map' && styles.segmentButtonTextActive,
+                ]}
+              >
+                Mapa
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {viewMode === 'list' ? (
+          <RecentReportsList
+            reports={recentReports}
+            onReportPress={handleReportPress}
+            onVerTodos={() => router.push('/(tabs)/reports')}
+          />
+        ) : (
+          <HomeMapTab reports={recentReports} />
+        )}
       </View>
     </ScrollView>
   );
@@ -269,5 +326,43 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: FontWeight.semibold,
     color: Colors.textSecondary,
+  },
+  viewSelectorContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  sectionTitle: {
+    fontSize: FontSize.md,
+    fontWeight: FontWeight.bold,
+    color: Colors.textPrimary,
+  },
+  segmentedControl: {
+    flexDirection: 'row',
+    backgroundColor: Colors.borderLight,
+    padding: 2,
+    borderRadius: BorderRadius.md,
+  },
+  segmentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 6,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md - 2,
+  },
+  segmentButtonActive: {
+    backgroundColor: Colors.primary,
+    ...Shadows.sm,
+  },
+  segmentButtonText: {
+    fontSize: FontSize.xs,
+    fontWeight: FontWeight.semibold,
+    color: Colors.textSecondary,
+  },
+  segmentButtonTextActive: {
+    color: Colors.textInverse,
   },
 });

@@ -12,6 +12,7 @@ import { AuthProvider, useAuth } from '@/src/shared/hooks/useAuth';
 import { LoadingState } from '@/src/shared/components/ui/LoadingState';
 import { View } from 'react-native';
 import { Colors } from '@/src/shared/constants/theme';
+import { NotificationProvider } from '@/src/shared/hooks/useNotifications';
 
 /**
  * Componente interno que maneja la redirección basada en auth.
@@ -34,7 +35,7 @@ function RootNavigator() {
       // Autenticado pero en grupo auth → ir a tabs
       router.replace('/(tabs)');
     }
-  }, [user, isLoading, segments]);
+  }, [user, isLoading, segments, router]);
 
   if (isLoading) {
     return (
@@ -52,9 +53,7 @@ function RootNavigator() {
         <Stack.Screen
           name="report/[id]"
           options={{
-            headerShown: true,
-            title: 'Detalle del Reporte',
-            headerTintColor: Colors.primary,
+            headerShown: false,
           }}
         />
       </Stack>
@@ -66,7 +65,10 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootNavigator />
+      <NotificationProvider>
+        <RootNavigator />
+      </NotificationProvider>
     </AuthProvider>
   );
 }
+

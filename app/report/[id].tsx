@@ -23,6 +23,7 @@ import { getEvidencesByReportId } from '@/src/features/evidence/services/evidenc
 import type { Report, TrackingEntry, Evidence } from '@/src/shared/types';
 import { ReportDetailCard } from '@/src/features/reports/components/ReportDetailCard';
 import { EvidenceViewer } from '@/src/features/reports/components/EvidenceViewer';
+// eslint-disable-next-line import/no-unresolved
 import { MapPreview } from '@/src/features/reports/components/MapPreview';
 import { TrackingTimeline } from '@/src/features/tracking/components/TrackingTimeline';
 import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '@/src/shared/constants/theme';

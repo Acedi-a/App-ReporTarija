@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/src/shared/hooks/useAuth';
+import { useNotifications } from '@/src/shared/hooks/useNotifications';
 import { getMyNotifications, markNotificationAsRead } from '@/src/features/notifications/services/notificationService';
 import type { Notification } from '@/src/shared/types';
 import { ScreenContainer } from '@/src/shared/components/ui/ScreenContainer';
@@ -25,6 +26,7 @@ import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '@/
 
 export default function NotificationsScreen() {
   const { user } = useAuth();
+  const { refreshUnreadCount } = useNotifications();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -39,13 +41,14 @@ export default function NotificationsScreen() {
     try {
       const data = await getMyNotifications(user.id);
       setNotifications(data);
+      refreshUnreadCount();
     } catch (error) {
       console.error('Error al cargar notificaciones:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user?.id]);
+  }, [user?.id, refreshUnreadCount]);
 
   useEffect(() => {
     loadNotifications();
@@ -65,6 +68,7 @@ export default function NotificationsScreen() {
         setNotifications((prev) =>
           prev.map((n) => (n.id === notification.id ? { ...n, is_read: true } : n))
         );
+        refreshUnreadCount();
       } catch (err) {
         console.error('Error al marcar notificación como leída:', err);
       }

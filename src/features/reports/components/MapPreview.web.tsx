@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import MapView, { Marker } from 'react-native-maps';
 import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '../../../shared/constants/theme';
 
 interface MapPreviewProps {
@@ -16,30 +15,14 @@ export function MapPreview({ latitude, longitude, address, neighborhood }: MapPr
   const lng = longitude || -64.7296;
 
   const handleOpenInGoogleMaps = () => {
-    if (!latitude || !longitude) return;
-
-    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-
-    // Protocolos para abrir la app nativa de mapas directamente
-    const nativeUrl = Platform.select({
-      ios: `maps://app?saddr=&daddr=${latitude},${longitude}`,
-      android: `google.navigation:q=${latitude},${longitude}`,
-      default: googleMapsUrl,
+    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    Linking.openURL(googleMapsUrl).catch((err) => {
+      console.error('No se pudo abrir el mapa externo:', err);
     });
-
-    Linking.canOpenURL(nativeUrl)
-      .then((supported) => {
-        if (supported) {
-          Linking.openURL(nativeUrl);
-        } else {
-          Linking.openURL(googleMapsUrl);
-        }
-      })
-      .catch((err) => {
-        console.error('No se pudo abrir el mapa externo:', err);
-        Linking.openURL(googleMapsUrl);
-      });
   };
+
+  // OpenStreetMap embed URL
+  const osmEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.003}%2C${lat - 0.003}%2C${lng + 0.003}%2C${lat + 0.003}&layer=mapnik&marker=${lat}%2C${lng}`;
 
   return (
     <View style={styles.card}>
@@ -61,37 +44,29 @@ export function MapPreview({ latitude, longitude, address, neighborhood }: MapPr
         </View>
       </View>
 
-      {/* Mapa Real Interactivo que abre Google Maps al pulsar */}
-      <TouchableOpacity
-        style={styles.mapContainer}
-        activeOpacity={0.85}
-        onPress={handleOpenInGoogleMaps}
-      >
-        <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: lat,
-            longitude: lng,
-            latitudeDelta: 0.005,
-            longitudeDelta: 0.005,
+      <View style={styles.mapContainer}>
+        {/* On Web we use standard iframe for OpenStreetMap */}
+        <iframe
+          src={osmEmbedUrl}
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
           }}
-          scrollEnabled={false}
-          zoomEnabled={false}
-          pitchEnabled={false}
-          rotateEnabled={false}
+          title="Mapa de ubicación"
+        />
+        
+        <TouchableOpacity
+          style={styles.mapOverlay}
+          activeOpacity={0.85}
+          onPress={handleOpenInGoogleMaps}
         >
-          <Marker
-            coordinate={{ latitude: lat, longitude: lng }}
-            pinColor={Colors.primary}
-          />
-        </MapView>
-        <View style={styles.mapOverlay}>
           <View style={styles.googleMapsBadge}>
             <Ionicons name="open-outline" size={12} color={Colors.primary} />
             <Text style={styles.googleMapsBadgeText}>Abrir en Google Maps</Text>
           </View>
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -137,15 +112,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  map: {
-    width: '100%',
-    height: '100%',
-  },
   mapOverlay: {
     position: 'absolute',
     bottom: Spacing.xs,
     right: Spacing.xs,
-  },
+    cursor: 'pointer',
+  } as any,
   googleMapsBadge: {
     flexDirection: 'row',
     alignItems: 'center',

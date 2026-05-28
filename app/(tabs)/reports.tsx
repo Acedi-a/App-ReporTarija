@@ -20,7 +20,7 @@ import { getMyReports } from '@/src/features/reports/services/reportService';
 import type { Report } from '@/src/shared/types';
 import { ReportCard } from '@/src/features/reports/components/ReportCard';
 import { ScreenContainer } from '@/src/shared/components/ui/ScreenContainer';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '@/src/shared/constants/theme';
+import { Colors, FontSize, FontWeight, Spacing, BorderRadius } from '@/src/shared/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
 type FilterTab = 'TODOS' | 'PENDIENTES' | 'PROCESO' | 'RESUELTOS' | 'RECHAZADOS';

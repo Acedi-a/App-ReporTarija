@@ -6,10 +6,15 @@
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return 'Hoy';
+  // Normalizar ambas fechas a la medianoche local para calcular la diferencia exacta en días calendarios
+  const dateMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const diffMs = nowMidnight.getTime() - dateMidnight.getTime();
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 0) return 'Hoy';
   if (diffDays === 1) return 'Ayer';
   if (diffDays < 7) return `Hace ${diffDays} días`;
 

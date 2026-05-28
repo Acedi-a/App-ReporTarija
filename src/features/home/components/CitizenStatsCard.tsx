@@ -7,15 +7,13 @@ import {
   FontSize,
   FontWeight,
   Spacing,
-  BorderRadius,
 } from '../../../shared/constants/theme';
+import { getStatusConfig } from '../../../shared/constants/reportStatus';
 
 interface CitizenStatsCardProps {
   stats: Record<ReportStatus, number>;
   onVerTodos?: () => void;
 }
-
-import { getStatusConfig } from '../../../shared/constants/reportStatus';
 
 export function CitizenStatsCard({ stats, onVerTodos }: CitizenStatsCardProps) {
   const visibleKeys: ('PENDIENTE' | 'EN_REVISION' | 'EN_PROCESO' | 'RESUELTO')[] = [
