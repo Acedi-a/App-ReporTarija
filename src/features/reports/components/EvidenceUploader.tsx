@@ -1,13 +1,34 @@
-// ============================================================
-// EvidenceUploader - Cargador de evidencias fotográficas
-// Integra la cámara y la galería de imágenes del dispositivo
-// ============================================================
-
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '../../../shared/constants/theme';
+import * as ImagePicker from 'expo-image-picker';
+import React from 'react';
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BorderRadius, Colors, FontSize, FontWeight, Shadows, Spacing } from '../../../shared/constants/theme';
+
+const IMAGE_PICKER_OPTIONS: ImagePicker.ImagePickerOptions = {
+  mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  allowsEditing: true,
+  aspect: [4, 3],
+  quality: 0.8,
+};
+
+const IMAGE_SOURCES = [
+  {
+    key: 'camera' as const,
+    icon: 'camera' as keyof typeof Ionicons.glyphMap,
+    title: 'Tomar Foto',
+    subtitle: 'Usar la cámara',
+    errorMessage: 'No se pudo abrir la cámara en este dispositivo.',
+  },
+  {
+    key: 'gallery' as const,
+    icon: 'images' as keyof typeof Ionicons.glyphMap,
+    title: 'Galería',
+    subtitle: 'Subir imagen',
+    errorMessage: 'No se pudo abrir la galería de fotos.',
+  },
+] as const;
+
+type ImageSource = typeof IMAGE_SOURCES[number]['key'];
 
 interface EvidenceUploaderProps {
   imageUri: string | null;
@@ -28,46 +49,26 @@ export function EvidenceUploader({ imageUri, onChangeImage }: EvidenceUploaderPr
     }
     return true;
   }
-
-  async function handleTakePhoto() {
+  async function pickImageFromSource(source: ImageSource) {
     const hasPermission = await requestPermissions();
     if (!hasPermission) return;
 
+    const sourceConfig = IMAGE_SOURCES.find((s) => s.key === source)!;
+
     try {
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
-      });
+      const launchFn =
+        source === 'camera'
+          ? ImagePicker.launchCameraAsync
+          : ImagePicker.launchImageLibraryAsync;
+
+      const result = await launchFn(IMAGE_PICKER_OPTIONS);
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         onChangeImage(result.assets[0].uri);
       }
     } catch (err) {
-      console.error('Error al tomar foto:', err);
-      Alert.alert('Error', 'No se pudo abrir la cámara en este dispositivo.');
-    }
-  }
-
-  async function handlePickImage() {
-    const hasPermission = await requestPermissions();
-    if (!hasPermission) return;
-
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        onChangeImage(result.assets[0].uri);
-      }
-    } catch (err) {
-      console.error('Error al seleccionar imagen:', err);
-      Alert.alert('Error', 'No se pudo abrir la galería de fotos.');
+      console.error(`Error al obtener imagen desde ${source}:`, err);
+      Alert.alert('Error', sourceConfig.errorMessage);
     }
   }
 
@@ -93,26 +94,28 @@ export function EvidenceUploader({ imageUri, onChangeImage }: EvidenceUploaderPr
         </View>
       ) : (
         <View style={styles.buttonsRow}>
-          <TouchableOpacity style={styles.uploadCard} onPress={handleTakePhoto} activeOpacity={0.7}>
-            <View style={styles.iconCircle}>
-              <Ionicons name="camera" size={24} color={Colors.primary} />
-            </View>
-            <Text style={styles.uploadTitle}>Tomar Foto</Text>
-            <Text style={styles.uploadSubtitle}>Usar la cámara</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.uploadCard} onPress={handlePickImage} activeOpacity={0.7}>
-            <View style={styles.iconCircle}>
-              <Ionicons name="images" size={24} color={Colors.primary} />
-            </View>
-            <Text style={styles.uploadTitle}>Galería</Text>
-            <Text style={styles.uploadSubtitle}>Subir imagen</Text>
-          </TouchableOpacity>
+          {IMAGE_SOURCES.map((source) => (
+            <TouchableOpacity
+              key={source.key}
+              style={styles.uploadCard}
+              onPress={() => pickImageFromSource(source.key)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.iconCircle}>
+                <Ionicons name={source.icon} size={24} color={Colors.primary} />
+              </View>
+              <Text style={styles.uploadTitle}>{source.title}</Text>
+              <Text style={styles.uploadSubtitle}>{source.subtitle}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       )}
     </View>
   );
 }
+
+const ICON_CIRCLE_SIZE = 44;
+const PREVIEW_IMAGE_HEIGHT = 200;
 
 const styles = StyleSheet.create({
   container: {
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
   },
   previewImage: {
     width: '100%',
-    height: 200,
+    height: PREVIEW_IMAGE_HEIGHT,
     borderRadius: BorderRadius.sm,
     marginBottom: Spacing.sm,
     resizeMode: 'cover',
@@ -172,8 +175,8 @@ const styles = StyleSheet.create({
     ...Shadows.sm,
   },
   iconCircle: {
-    width: 44,
-    height: 44,
+    width: ICON_CIRCLE_SIZE,
+    height: ICON_CIRCLE_SIZE,
     borderRadius: BorderRadius.full,
     backgroundColor: `${Colors.primary}10`,
     alignItems: 'center',

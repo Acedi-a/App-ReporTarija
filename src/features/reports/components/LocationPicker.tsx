@@ -1,14 +1,9 @@
-// ============================================================
-// LocationPicker - Selector de Ubicación
-// Permite obtener coordenadas GPS y detallar dirección/barrio
-// ============================================================
-
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
+import React, { useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Input } from '../../../shared/components/ui/Input';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '../../../shared/constants/theme';
+import { BorderRadius, Colors, FontSize, FontWeight, Shadows, Spacing } from '../../../shared/constants/theme';
 
 interface LocationPickerProps {
   latitude: number | null;
@@ -24,6 +19,15 @@ interface LocationPickerProps {
   error?: string;
 }
 
+type GpsStatus = 'idle' | 'success' | 'error';
+
+
+function getGpsButtonText(isLoading: boolean, status: GpsStatus): string {
+  if (isLoading) return 'Obteniendo coordenadas GPS...';
+  if (status === 'success') return 'Ubicación GPS capturada con éxito';
+  return 'Obtener mi ubicación GPS actual';
+}
+
 export function LocationPicker({
   latitude,
   longitude,
@@ -33,7 +37,7 @@ export function LocationPicker({
   error,
 }: LocationPickerProps) {
   const [loading, setLoading] = useState(false);
-  const [gpsStatus, setGpsStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [gpsStatus, setGpsStatus] = useState<GpsStatus>('idle');
 
   async function handleGetLocation() {
     setLoading(true);
@@ -54,7 +58,6 @@ export function LocationPicker({
       const lat = location.coords.latitude;
       const lng = location.coords.longitude;
 
-      // Obtener dirección aproximada (Reverse Geocoding)
       let approxAddress = address;
       try {
         const [geocode] = await Location.reverseGeocodeAsync({
@@ -64,8 +67,8 @@ export function LocationPicker({
 
         if (geocode) {
           const street = geocode.street || '';
-          const number = geocode.streetNumber ? ` ${geocode.streetNumber}` : '';
-          approxAddress = street ? `${street}${number}` : approxAddress;
+          const streetNumber = geocode.streetNumber ? ` ${geocode.streetNumber}` : '';
+          approxAddress = street ? `${street}${streetNumber}` : approxAddress;
         }
       } catch (err) {
         console.log('Error en reverse geocode, se usará la dirección manual:', err);
@@ -85,8 +88,6 @@ export function LocationPicker({
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Ubicación del Reporte</Text>
-
-      {/* Botón GPS */}
       <TouchableOpacity
         style={[
           styles.gpsButton,
@@ -112,15 +113,10 @@ export function LocationPicker({
             gpsStatus === 'success' && styles.gpsButtonTextSuccess,
           ]}
         >
-          {loading
-            ? 'Obteniendo coordenadas GPS...'
-            : gpsStatus === 'success'
-            ? 'Ubicación GPS capturada con éxito'
-            : 'Obtener mi ubicación GPS actual'}
+          {getGpsButtonText(loading, gpsStatus)}
         </Text>
       </TouchableOpacity>
 
-      {/* Badges de Coordenadas */}
       {latitude && longitude && (
         <View style={styles.coordContainer}>
           <View style={styles.badge}>
@@ -132,7 +128,6 @@ export function LocationPicker({
         </View>
       )}
 
-      {/* Campos Manuales */}
       <View style={styles.inputsRow}>
         <Input
           label="Dirección aproximada (Calle y Nro.) *"
