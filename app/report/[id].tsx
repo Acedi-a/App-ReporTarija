@@ -1,76 +1,40 @@
-// ============================================================
-// ReportDetailScreen - Visualización a detalle de un reporte
-// Muestra datos, evidencia de foto, ubicación e historial de seguimiento
-// ============================================================
-
-import React, { useEffect, useState, useCallback } from 'react';
+import { EvidenceViewer } from '@/src/features/reports/components/EvidenceViewer';
+import { MapPreview } from '@/src/features/reports/components/MapPreview';
+import { ReportDetailCard } from '@/src/features/reports/components/ReportDetailCard';
+import { useReportDetail } from '@/src/features/reports/hooks/useReportDetail';
+import { TrackingTimeline } from '@/src/features/tracking/components/TrackingTimeline';
+import { BorderRadius, Colors, FontSize, FontWeight, Shadows, Spacing } from '@/src/shared/constants/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
+  Platform,
   RefreshControl,
   SafeAreaView,
-  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { getReportById } from '@/src/features/reports/services/reportService';
-import { getTrackingByReportId } from '@/src/features/tracking/services/trackingService';
-import { getEvidencesByReportId } from '@/src/features/evidence/services/evidenceService';
-import type { Report, TrackingEntry, Evidence } from '@/src/shared/types';
-import { ReportDetailCard } from '@/src/features/reports/components/ReportDetailCard';
-import { EvidenceViewer } from '@/src/features/reports/components/EvidenceViewer';
-// eslint-disable-next-line import/no-unresolved
-import { MapPreview } from '@/src/features/reports/components/MapPreview';
-import { TrackingTimeline } from '@/src/features/tracking/components/TrackingTimeline';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '@/src/shared/constants/theme';
+
+const HEADER_BACK_ICON_SIZE = 24;
+const ERROR_ICON_SIZE = 48;
+const HEADER_ASPECT_W = 40;
 
 export default function ReportDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-
-  const [report, setReport] = useState<Report | null>(null);
-  const [tracking, setTracking] = useState<TrackingEntry[]>([]);
-  const [evidences, setEvidences] = useState<Evidence[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadData = useCallback(async (isSilent = false) => {
-    if (!id) return;
-    if (!isSilent) setLoading(true);
-    setError(null);
-
-    try {
-      const [reportData, trackingData, evidenceData] = await Promise.all([
-        getReportById(id),
-        getTrackingByReportId(id),
-        getEvidencesByReportId(id),
-      ]);
-
-      setReport(reportData);
-      setTracking(trackingData);
-      setEvidences(evidenceData);
-    } catch (err: any) {
-      console.error('Error al cargar detalle de reporte:', err);
-      setError('No se pudieron obtener los datos de este reporte.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  const handleRefresh = useCallback(() => {
-    setRefreshing(true);
-    loadData(true);
-  }, [loadData]);
+  const {
+    report,
+    tracking,
+    evidences,
+    loading,
+    refreshing,
+    error,
+    handleRefresh,
+  } = useReportDetail(id);
 
   if (loading) {
     return (
@@ -84,7 +48,7 @@ export default function ReportDetailScreen() {
   if (error || !report) {
     return (
       <SafeAreaView style={styles.errorContainer}>
-        <Ionicons name="alert-circle-outline" size={48} color={Colors.error} />
+        <Ionicons name="alert-circle-outline" size={ERROR_ICON_SIZE} color={Colors.error} />
         <Text style={styles.errorText}>{error || 'El reporte no existe'}</Text>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Text style={styles.backBtnText}>Volver atrás</Text>
@@ -95,13 +59,12 @@ export default function ReportDetailScreen() {
 
   return (
     <SafeAreaView style={styles.safeContainer}>
-      {/* Header Fijo */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backIconButton} onPress={() => router.back()} activeOpacity={0.7}>
-          <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
+          <Ionicons name="arrow-back" size={HEADER_BACK_ICON_SIZE} color={Colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>Detalle de Reporte</Text>
-        <View style={{ width: 40 }} />
+        <View style={{ width: HEADER_ASPECT_W }} />
       </View>
 
       <ScrollView
@@ -117,13 +80,10 @@ export default function ReportDetailScreen() {
           />
         }
       >
-        {/* Card Principal Detallada */}
         <ReportDetailCard report={report} />
 
-        {/* Evidencia Fotográfica */}
         <EvidenceViewer evidences={evidences} />
 
-        {/* Ubicación y Mapa */}
         <MapPreview
           latitude={report.latitude ? Number(report.latitude) : null}
           longitude={report.longitude ? Number(report.longitude) : null}
@@ -131,7 +91,6 @@ export default function ReportDetailScreen() {
           neighborhood={report.neighborhood}
         />
 
-        {/* Línea de Tiempo de Seguimiento */}
         <View style={styles.card}>
           <Text style={styles.sectionLabel}>Historial de Seguimiento</Text>
           <View style={styles.timelineWrapper}>
@@ -160,8 +119,8 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'android' ? 36 : 8,
   },
   backIconButton: {
-    width: 40,
-    height: 40,
+    width: HEADER_ASPECT_W,
+    height: HEADER_ASPECT_W,
     borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',

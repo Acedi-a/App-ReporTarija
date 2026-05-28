@@ -1,9 +1,4 @@
-// ============================================================
-// MyReportsScreen - Listado y filtrado de reportes del ciudadano
-// Muestra todos los reportes propios organizados por pestañas de estado
-// ============================================================
-
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -15,84 +10,36 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '@/src/shared/hooks/useAuth';
-import { getMyReports } from '@/src/features/reports/services/reportService';
 import type { Report } from '@/src/shared/types';
 import { ReportCard } from '@/src/features/reports/components/ReportCard';
 import { ScreenContainer } from '@/src/shared/components/ui/ScreenContainer';
 import { Colors, FontSize, FontWeight, Spacing, BorderRadius } from '@/src/shared/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { useMyReports, type FilterTab } from '@/src/features/reports/hooks/useMyReports';
 
-type FilterTab = 'TODOS' | 'PENDIENTES' | 'PROCESO' | 'RESUELTOS' | 'RECHAZADOS';
+const TABS: { key: FilterTab; label: string }[] = [
+  { key: 'TODOS', label: 'Todos' },
+  { key: 'PENDIENTES', label: 'Pendientes' },
+  { key: 'PROCESO', label: 'En proceso' },
+  { key: 'RESUELTOS', label: 'Resueltos' },
+  { key: 'RECHAZADOS', label: 'Rechazados' },
+];
 
 export default function MyReportsScreen() {
-  const { user } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-
-  const [reports, setReports] = useState<Report[]>([]);
-  const [filteredReports, setFilteredReports] = useState<Report[]>([]);
-  const [activeTab, setActiveTab] = useState<FilterTab>('TODOS');
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-
-  const loadReports = useCallback(async (isSilent = false) => {
-    if (!user?.id) return;
-    if (!isSilent) setLoading(true);
-
-    try {
-      const data = await getMyReports(user.id);
-      setReports(data);
-    } catch (error) {
-      console.error('Error al cargar reportes:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [user?.id]);
-
-  useEffect(() => {
-    loadReports();
-  }, [loadReports]);
-
-  // Aplicar filtros locales cuando cambian los reportes o la pestaña activa
-  useEffect(() => {
-    if (activeTab === 'TODOS') {
-      setFilteredReports(reports);
-    } else if (activeTab === 'PENDIENTES') {
-      setFilteredReports(reports.filter((r) => r.status === 'PENDIENTE'));
-    } else if (activeTab === 'PROCESO') {
-      setFilteredReports(
-        reports.filter(
-          (r) =>
-            r.status === 'EN_REVISION' ||
-            r.status === 'ASIGNADO' ||
-            r.status === 'EN_PROCESO'
-        )
-      );
-    } else if (activeTab === 'RESUELTOS') {
-      setFilteredReports(reports.filter((r) => r.status === 'RESUELTO'));
-    } else if (activeTab === 'RECHAZADOS') {
-      setFilteredReports(reports.filter((r) => r.status === 'RECHAZADO'));
-    }
-  }, [reports, activeTab]);
-
-  const handleRefresh = useCallback(() => {
-    setRefreshing(true);
-    loadReports(true);
-  }, [loadReports]);
+  const {
+    filteredReports,
+    activeTab,
+    setActiveTab,
+    loading,
+    refreshing,
+    handleRefresh,
+  } = useMyReports();
 
   function handleReportPress(report: Report) {
     router.push({ pathname: '/report/[id]', params: { id: report.id } });
   }
-
-  const tabs: { key: FilterTab; label: string }[] = [
-    { key: 'TODOS', label: 'Todos' },
-    { key: 'PENDIENTES', label: 'Pendientes' },
-    { key: 'PROCESO', label: 'En proceso' },
-    { key: 'RESUELTOS', label: 'Resueltos' },
-    { key: 'RECHAZADOS', label: 'Rechazados' },
-  ];
 
   return (
     <ScreenContainer scrollable={false}>
@@ -105,7 +52,7 @@ export default function MyReportsScreen() {
         {/* Pestañas de Filtro Horizontal */}
         <View style={styles.tabsWrapper}>
           <FlatList
-            data={tabs}
+            data={TABS}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.tabsContainer}
