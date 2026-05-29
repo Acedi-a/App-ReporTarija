@@ -1,6 +1,8 @@
 
 import { insforge } from '../../../lib/insforge';
 import type { User } from '../../../shared/types';
+import type { LoginDto } from '../dtos/login.dto';
+import type { RegisterDto } from '../dtos/register.dto';
 
 
 const DEMO_USER: User = {
@@ -17,10 +19,10 @@ const DEMO_USER: User = {
 };
 
 
-export async function login(email: string, password: string): Promise<User> {
+export async function login(credentials: LoginDto): Promise<User> {
   const { data: authData, error: authError } = await insforge.auth.signInWithPassword({
-    email,
-    password,
+    email: credentials.email,
+    password: credentials.password,
   });
 
   if (authError) {
@@ -34,7 +36,7 @@ export async function login(email: string, password: string): Promise<User> {
   const { data: users, error: dbError } = await insforge.database
     .from('users')
     .select()
-    .eq('email', email)
+    .eq('email', credentials.email)
     .limit(1);
 
   if (dbError) {
@@ -55,16 +57,11 @@ export async function login(email: string, password: string): Promise<User> {
 }
 
 
-export async function register(
-  fullName: string,
-  email: string,
-  phone: string | undefined,
-  password: string,
-): Promise<User> {
+export async function register(userData: RegisterDto): Promise<User> {
   const { data: authData, error: authError } = await insforge.auth.signUp({
-    email,
-    password,
-    name: fullName,
+    email: userData.email,
+    password: userData.password,
+    name: userData.fullName,
   });
 
   if (authError) {
@@ -78,9 +75,9 @@ export async function register(
 
   const newUser = {
     id: authData.user.id,
-    full_name: fullName,
-    email,
-    phone: phone || null,
+    full_name: userData.fullName,
+    email: userData.email,
+    phone: userData.phone || null,
     role: 'CITIZEN' as const,
     is_active: true,
   };

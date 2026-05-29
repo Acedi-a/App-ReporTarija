@@ -1,14 +1,10 @@
-// ============================================================
-// TrackingTimeline - Línea de tiempo de seguimiento
-// Muestra el historial de cambios de estado de un reporte
-// ============================================================
 
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import type { TrackingEntry } from '../../../shared/types';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { getStatusConfig } from '../../../shared/constants/reportStatus';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius } from '../../../shared/constants/theme';
+import { BorderRadius, Colors, FontSize, FontWeight, Spacing } from '../../../shared/constants/theme';
+import type { TrackingEntry } from '../../../shared/types';
 import { formatDate } from '../../../shared/utils/date';
 
 interface TrackingTimelineProps {
@@ -33,7 +29,6 @@ export function TrackingTimeline({ entries }: TrackingTimelineProps) {
 
         return (
           <View key={entry.id || index} style={styles.item}>
-            {/* Línea e Indicador */}
             <View style={styles.indicatorContainer}>
               <View
                 style={[
@@ -50,7 +45,6 @@ export function TrackingTimeline({ entries }: TrackingTimelineProps) {
               {!isLast && <View style={styles.line} />}
             </View>
 
-            {/* Contenido */}
             <View style={styles.content}>
               <View style={styles.header}>
                 <Text style={[styles.statusLabel, { color: config.color }]}>

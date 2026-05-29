@@ -1,7 +1,3 @@
-// ============================================================
-// Configuración de categorías de reporte
-// Colores, labels e iconos para cada categoría
-// ============================================================
 
 import { Ionicons } from '@expo/vector-icons';
 
@@ -58,24 +54,21 @@ export const DEFAULT_CATEGORY_CONFIG: CategoryStyleConfig = {
   backgroundColor: '#EEF2FF',
 };
 
-/**
- * Obtiene la configuración visual de una categoría basándose en su código o nombre.
- */
+
 export function getCategoryConfig(codeOrName?: string): CategoryStyleConfig {
   if (!codeOrName) return DEFAULT_CATEGORY_CONFIG;
-  
+
   const normalized = codeOrName.toUpperCase().replace(/\s+/g, '_');
   if (CATEGORY_CONFIGS[normalized]) {
     return CATEGORY_CONFIGS[normalized];
   }
-  
-  // Búsqueda aproximada por coincidencia en el nombre para datos demo
+
   const name = codeOrName.toLowerCase();
   if (name.includes('bache')) return CATEGORY_CONFIGS.BACHE;
   if (name.includes('alumbrado') || name.includes('luminaria')) return CATEGORY_CONFIGS.ALUMBRADO_PUBLICO;
   if (name.includes('basura')) return CATEGORY_CONFIGS.BASURA_ACUMULADA;
   if (name.includes('agua') || name.includes('fuga')) return CATEGORY_CONFIGS.FUGA_DE_AGUA;
   if (name.includes('semáforo') || name.includes('semaforo')) return CATEGORY_CONFIGS.SEMAFORO_DANADO;
-  
+
   return DEFAULT_CATEGORY_CONFIG;
 }

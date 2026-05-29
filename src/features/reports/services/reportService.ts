@@ -1,15 +1,8 @@
-// ============================================================
-// Report Service - Servicio de reportes
-// CRUD de reportes ciudadanos conectado a InsForge
-// ============================================================
-
 import { insforge } from '../../../lib/insforge';
-import type { Report, CreateReportData, ReportStatus, Category } from '../../../shared/types';
+import type { Category, Report, ReportStatus } from '../../../shared/types';
+import type { CreateReportDto } from '../dtos/create-report.dto';
 
-/**
- * Obtener reportes del ciudadano autenticado.
- * Solo devuelve reportes propios (filtrado por citizen_id).
- */
+
 export async function getMyReports(citizenId: string): Promise<Report[]> {
   const { data, error } = await insforge.database
     .from('reports')
@@ -24,9 +17,7 @@ export async function getMyReports(citizenId: string): Promise<Report[]> {
   return (data as Report[]) || [];
 }
 
-/**
- * Obtener reportes recientes del ciudadano (limitado a N).
- */
+
 export async function getRecentReports(citizenId: string, limit: number = 5): Promise<Report[]> {
   const { data, error } = await insforge.database
     .from('reports')
@@ -42,9 +33,7 @@ export async function getRecentReports(citizenId: string, limit: number = 5): Pr
   return (data as Report[]) || [];
 }
 
-/**
- * Obtener un reporte por ID.
- */
+
 export async function getReportById(reportId: string): Promise<Report> {
   const { data, error } = await insforge.database
     .from('reports')
@@ -59,11 +48,8 @@ export async function getReportById(reportId: string): Promise<Report> {
   return data as Report;
 }
 
-/**
- * Crear un nuevo reporte.
- * El reporte siempre inicia con estado PENDIENTE.
- */
-export async function createReport(citizenId: string, reportData: CreateReportData): Promise<Report> {
+
+export async function createReport(citizenId: string, reportData: CreateReportDto): Promise<Report> {
   const newReport = {
     ...reportData,
     citizen_id: citizenId,
@@ -87,9 +73,6 @@ export async function createReport(citizenId: string, reportData: CreateReportDa
   return data[0] as Report;
 }
 
-/**
- * Obtener conteo de reportes por estado para un ciudadano.
- */
 export async function getReportStats(citizenId: string): Promise<Record<ReportStatus, number>> {
   const { data, error } = await insforge.database
     .from('reports')
@@ -118,9 +101,7 @@ export async function getReportStats(citizenId: string): Promise<Record<ReportSt
   return stats;
 }
 
-/**
- * Obtener listado de categorías activas del sistema.
- */
+
 export async function getCategories(): Promise<Category[]> {
   const { data, error } = await insforge.database
     .from('categories')

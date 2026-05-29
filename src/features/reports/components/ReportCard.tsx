@@ -1,23 +1,19 @@
-// ============================================================
-// ReportCard - Card de reporte para listas
-// Muestra título, categoría, estado, fecha y dirección
-// ============================================================
 
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import type { Report } from '../../../shared/types';
-import { ReportStatusBadge } from './ReportStatusBadge';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { getCategoryConfig } from '../../../shared/constants/categories';
 import {
+  BorderRadius,
   Colors,
   FontSize,
   FontWeight,
-  Spacing,
-  BorderRadius,
   Shadows,
+  Spacing,
 } from '../../../shared/constants/theme';
+import type { Report } from '../../../shared/types';
 import { formatDate } from '../../../shared/utils/date';
-import { getCategoryConfig } from '../../../shared/constants/categories';
+import { ReportStatusBadge } from './ReportStatusBadge';
 
 interface ReportCardProps {
   report: Report;
@@ -39,12 +35,10 @@ export function ReportCard({ report, onPress }: ReportCardProps) {
       onPress={() => onPress(report)}
       activeOpacity={0.7}
     >
-      {/* Icono de categoría */}
       <View style={[styles.iconContainer, { backgroundColor: iconBg }]}>
         <Ionicons name={categoryIcon} size={22} color={iconColor} />
       </View>
 
-      {/* Contenido */}
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={1}>
           {report.title}
@@ -68,12 +62,10 @@ export function ReportCard({ report, onPress }: ReportCardProps) {
         )}
       </View>
 
-      {/* Badge de estado a la derecha */}
       <View style={{ marginRight: 2 }}>
         <ReportStatusBadge status={report.status} size="sm" />
       </View>
 
-      {/* Chevron */}
       <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
     </TouchableOpacity>
   );

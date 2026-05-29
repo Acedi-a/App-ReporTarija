@@ -1,15 +1,11 @@
-// ============================================================
-// CategorySelector - Selector de categorías
-// Muestra una grilla interactiva de categorías con sus iconos
-// ============================================================
 
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getCategories } from '../services/reportService';
-import type { Category } from '../../../shared/types';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { getCategoryConfig } from '../../../shared/constants/categories';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '../../../shared/constants/theme';
+import { BorderRadius, Colors, FontSize, FontWeight, Shadows, Spacing } from '../../../shared/constants/theme';
+import type { Category } from '../../../shared/types';
+import { getCategories } from '../services/reportService';
 
 interface CategorySelectorProps {
   selectedCategoryId: number | null;

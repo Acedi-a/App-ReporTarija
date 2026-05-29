@@ -1,16 +1,11 @@
-// ============================================================
-// ReportDetailCard - Card de detalle de un reporte
-// Muestra título, categoría, estado y descripción detallada
-// ============================================================
-
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import type { Report } from '../../../shared/types';
-import { ReportStatusBadge } from './ReportStatusBadge';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { getCategoryConfig } from '../../../shared/constants/categories';
+import { BorderRadius, Colors, FontSize, FontWeight, Shadows, Spacing } from '../../../shared/constants/theme';
+import type { Report } from '../../../shared/types';
 import { formatDate } from '../../../shared/utils/date';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '../../../shared/constants/theme';
+import { ReportStatusBadge } from './ReportStatusBadge';
 
 interface ReportDetailCardProps {
   report: Report;

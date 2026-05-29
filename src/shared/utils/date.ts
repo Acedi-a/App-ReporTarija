@@ -1,13 +1,8 @@
-// ============================================================
-// Date Utils - Utilidades de fecha para ReporTarija
-// ============================================================
 
-/** Formatear fecha a formato legible (Hoy, Ayer, Hace N días, etc.) */
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
 
-  // Normalizar ambas fechas a la medianoche local para calcular la diferencia exacta en días calendarios
   const dateMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 

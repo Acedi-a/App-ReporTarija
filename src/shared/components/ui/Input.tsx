@@ -1,20 +1,16 @@
-// ============================================================
-// Input - Componente reutilizable de campo de texto
-// Soporta label, error, icono y variante segura (password)
-// ============================================================
 
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-  View,
-  TextInput,
-  Text,
   StyleSheet,
+  Text,
+  TextInput,
   TouchableOpacity,
+  View,
   type TextInputProps,
   type ViewStyle,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, BorderRadius, FontSize, FontWeight, Spacing } from '../../constants/theme';
+import { BorderRadius, Colors, FontSize, FontWeight, Spacing } from '../../constants/theme';
 
 interface InputProps extends Omit<TextInputProps, 'style'> {
   label?: string;

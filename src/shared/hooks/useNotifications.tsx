@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useAuth } from './useAuth';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { getMyNotifications } from '../../features/notifications/services/notificationService';
+import { useAuth } from './useAuth';
 
 interface NotificationContextType {
   unreadCount: number;
@@ -30,7 +30,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     refreshUnreadCount();
 
-    // Polling cada 15 segundos para mantener el contador al día
     const interval = setInterval(() => {
       refreshUnreadCount();
     }, 15000);

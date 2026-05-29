@@ -1,14 +1,7 @@
-// ============================================================
-// Notification Service - Notificaciones internas del ciudadano
-// Conectado a la base de datos de InsForge
-// ============================================================
-
 import { insforge } from '../../../lib/insforge';
 import type { Notification } from '../../../shared/types';
 
-/**
- * Obtener notificaciones del ciudadano.
- */
+
 export async function getMyNotifications(userId: string): Promise<Notification[]> {
   const { data, error } = await insforge.database
     .from('notifications')
@@ -23,9 +16,7 @@ export async function getMyNotifications(userId: string): Promise<Notification[]
   return (data as Notification[]) || [];
 }
 
-/**
- * Marcar una notificación específica como leída.
- */
+
 export async function markNotificationAsRead(id: number): Promise<void> {
   const { error } = await insforge.database
     .from('notifications')

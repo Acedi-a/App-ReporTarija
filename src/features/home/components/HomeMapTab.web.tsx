@@ -1,11 +1,3 @@
-// ============================================================
-// HomeMapTab (Web) - Vista de mapa con OpenStreetMap iframe
-// Refactorizaciones aplicadas:
-//   - Extract Component: MapReportPreviewCard (CO-H01)
-//   - Eliminación de estilos duplicados (~50 líneas)
-//   - Replace Magic Number: coordenadas Tarija como constante
-// ============================================================
-
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,7 +5,6 @@ import type { Report } from '../../../shared/types';
 import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '../../../shared/constants/theme';
 import { MapReportPreviewCard } from './MapReportPreviewCard';
 
-/** Coordenadas por defecto de Tarija, Bolivia */
 const TARIJA_DEFAULT_LAT = -21.5355;
 const TARIJA_DEFAULT_LNG = -64.7296;
 const MAP_BBOX_OFFSET = 0.005;
@@ -23,14 +14,12 @@ interface HomeMapTabProps {
   reports: Report[];
 }
 
-/** Filtra reportes que tengan coordenadas válidas */
 function filterGeolocatedReports(reports: Report[]): Report[] {
   return reports.filter(
     (report) => report.latitude !== null && report.longitude !== null
   );
 }
 
-/** Genera la URL del embed de OpenStreetMap */
 function buildOsmEmbedUrl(latitude: number, longitude: number): string {
   const west = longitude - MAP_BBOX_OFFSET;
   const south = latitude - MAP_BBOX_OFFSET;
@@ -53,7 +42,6 @@ export function HomeMapTab({ reports }: HomeMapTabProps) {
         Mostrando {reportsWithCoords.length} reportes geolocalizados en Tarija (Toca un reporte para centrar el mapa)
       </Text>
 
-      {/* Lista horizontal de reportes geolocalizados */}
       {reportsWithCoords.length > 0 && (
         <ScrollView
           horizontal
@@ -85,7 +73,6 @@ export function HomeMapTab({ reports }: HomeMapTabProps) {
         </ScrollView>
       )}
 
-      {/* Contenedor del Mapa (Iframe OpenStreetMap en web) */}
       <View style={styles.mapWrapper}>
         <iframe
           src={osmEmbedUrl}

@@ -1,11 +1,6 @@
-// ============================================================
-// Tipos globales de la aplicación ReporTarija
-// ============================================================
 
-/** Roles del sistema */
 export type UserRole = 'CITIZEN' | 'ADMIN' | 'FUNCIONARIO' | 'TECNICO' | 'RESPONSABLE_AREA';
 
-/** Estados posibles de un reporte */
 export type ReportStatus =
   | 'PENDIENTE'
   | 'EN_REVISION'
@@ -14,13 +9,8 @@ export type ReportStatus =
   | 'RESUELTO'
   | 'RECHAZADO';
 
-/** Prioridades de reporte */
 export type ReportPriority = 'BAJA' | 'MEDIA' | 'ALTA' | 'URGENTE';
-
-/** Tipos de notificación */
 export type NotificationType = 'INFO' | 'WARNING' | 'SUCCESS' | 'ERROR';
-
-/** Códigos de categoría */
 export type CategoryCode =
   | 'BACHE'
   | 'ALUMBRADO_PUBLICO'
@@ -29,9 +19,6 @@ export type CategoryCode =
   | 'SEMAFORO_DANADO'
   | 'OTROS';
 
-// ============================================================
-// Entidades de la base de datos
-// ============================================================
 
 export interface User {
   id: string;
@@ -73,7 +60,6 @@ export interface Report {
   created_at: string;
   updated_at: string;
   resolved_at: string | null;
-  /** Relación con categoría (join) */
   categories?: Category;
 }
 
@@ -108,16 +94,4 @@ export interface Notification {
   created_at: string;
 }
 
-// ============================================================
-// Datos para crear reportes
-// ============================================================
 
-export interface CreateReportData {
-  title: string;
-  description: string;
-  category_id: number;
-  latitude?: number | null;
-  longitude?: number | null;
-  address?: string | null;
-  neighborhood?: string | null;
-}

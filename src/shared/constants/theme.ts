@@ -1,31 +1,21 @@
-// ============================================================
-// Sistema de diseño - ReporTarija
-// Colores, tipografía y spacing de la app
-// ============================================================
 
 export const Colors = {
-  /** Color principal de la marca */
   primary: '#0D9488',
   primaryLight: '#14B8A6',
   primaryDark: '#0F766E',
   primarySoft: '#CCFBF1',
 
-  /** Fondos */
   background: '#F8FAFC',
   surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
-
-  /** Texto */
   textPrimary: '#0F172A',
   textSecondary: '#475569',
   textMuted: '#94A3B8',
   textInverse: '#FFFFFF',
 
-  /** Bordes */
   border: '#E2E8F0',
   borderLight: '#F1F5F9',
 
-  /** Acciones */
   error: '#EF4444',
   errorLight: '#FEE2E2',
   success: '#22C55E',
@@ -35,7 +25,6 @@ export const Colors = {
   info: '#3B82F6',
   infoLight: '#DBEAFE',
 
-  /** Estado deshabilitado */
   disabled: '#CBD5E1',
   disabledText: '#94A3B8',
 } as const;

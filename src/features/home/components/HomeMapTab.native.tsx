@@ -1,11 +1,3 @@
-// ============================================================
-// HomeMapTab (Native) - Vista de mapa con react-native-maps
-// Refactorizaciones aplicadas:
-//   - Extract Component: MapReportPreviewCard (CO-H01)
-//   - Decompose Conditional: getStatusConfig reemplaza if/else (OA-H01)
-//   - Eliminación de estilos duplicados (~50 líneas)
-// ============================================================
-
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
@@ -14,7 +6,6 @@ import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '..
 import { getStatusConfig } from '../../../shared/constants/reportStatus';
 import { MapReportPreviewCard } from './MapReportPreviewCard';
 
-/** Coordenadas por defecto de Tarija, Bolivia */
 const TARIJA_DEFAULT_COORDS = {
   latitude: -21.5355,
   longitude: -64.7296,
@@ -26,7 +17,6 @@ interface HomeMapTabProps {
   reports: Report[];
 }
 
-/** Filtra reportes que tengan coordenadas válidas */
 function filterGeolocatedReports(reports: Report[]): Report[] {
   return reports.filter(
     (report) => report.latitude !== null && report.longitude !== null
@@ -50,9 +40,6 @@ export function HomeMapTab({ reports }: HomeMapTabProps) {
           onPress={() => setSelectedReport(null)}
         >
           {reportsWithCoords.map((report) => {
-            // Refactorización: Decompose Conditional (OA-H01)
-            // Antes: cadena de if/else con colores hardcodeados
-            // Ahora: usa getStatusConfig() que ya existe
             const statusConfig = getStatusConfig(report.status);
 
             return (

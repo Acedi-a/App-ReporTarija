@@ -1,16 +1,15 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { BorderRadius, Colors, FontSize, FontWeight, Shadows, Spacing } from '@/src/shared/constants/theme';
 import type { Notification } from '@/src/shared/types';
 import { formatDate } from '@/src/shared/utils/date';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '@/src/shared/constants/theme';
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface NotificationCardProps {
   notification: Notification;
   onPress: (notification: Notification) => void;
 }
 
-/** Configuración de iconos y colores de notificaciones por tipo */
 const NOTIFICATION_TYPE_CONFIG: Record<
   Notification['type'],
   { name: keyof typeof Ionicons.glyphMap; color: string }

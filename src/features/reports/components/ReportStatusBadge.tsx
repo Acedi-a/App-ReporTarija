@@ -1,13 +1,8 @@
-// ============================================================
-// ReportStatusBadge - Badge de estado de reporte
-// Componente reutilizable que muestra el estado con color
-// ============================================================
-
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import type { ReportStatus } from '../../../shared/types';
+import { StyleSheet, Text, View } from 'react-native';
 import { getStatusConfig } from '../../../shared/constants/reportStatus';
-import { FontSize, FontWeight, Spacing, BorderRadius } from '../../../shared/constants/theme';
+import { BorderRadius, FontSize, FontWeight, Spacing } from '../../../shared/constants/theme';
+import type { ReportStatus } from '../../../shared/types';
 
 interface ReportStatusBadgeProps {
   status: ReportStatus;
