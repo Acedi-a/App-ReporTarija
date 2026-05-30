@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '../../../shared/constants/theme';
+import { BorderRadius, Colors, FontSize, FontWeight, Shadows, Spacing } from '../../../shared/constants/theme';
 
 interface MapPreviewProps {
   latitude: number | null;
@@ -20,7 +20,6 @@ export function MapPreview({ latitude, longitude, address, neighborhood }: MapPr
 
     const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
 
-    // Protocolos para abrir la app nativa de mapas directamente
     const nativeUrl = Platform.select({
       ios: `maps://app?saddr=&daddr=${latitude},${longitude}`,
       android: `google.navigation:q=${latitude},${longitude}`,
@@ -61,7 +60,6 @@ export function MapPreview({ latitude, longitude, address, neighborhood }: MapPr
         </View>
       </View>
 
-      {/* Mapa Real Interactivo que abre Google Maps al pulsar */}
       <TouchableOpacity
         style={styles.mapContainer}
         activeOpacity={0.85}

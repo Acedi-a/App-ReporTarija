@@ -1,12 +1,8 @@
-// ============================================================
-// HomeHeader - Encabezado de la pantalla de inicio
-// Muestra saludo + badge demo si aplica
-// ============================================================
 
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius } from '../../../shared/constants/theme';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { BorderRadius, Colors, FontSize, FontWeight, Spacing } from '../../../shared/constants/theme';
 
 interface HomeHeaderProps {
   userName: string;

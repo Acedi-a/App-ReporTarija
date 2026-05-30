@@ -1,8 +1,3 @@
-// ============================================================
-// Configuración de estados de reporte
-// Colores, labels e iconos para cada estado
-// ============================================================
-
 import type { ReportStatus } from '../types';
 
 export interface StatusConfig {
@@ -58,12 +53,10 @@ export const REPORT_STATUS_CONFIG: Record<ReportStatus, StatusConfig> = {
   },
 };
 
-/** Obtener la configuración de un estado */
 export function getStatusConfig(status: ReportStatus): StatusConfig {
   return REPORT_STATUS_CONFIG[status];
 }
 
-/** Obtener el label legible de un estado */
 export function getStatusLabel(status: ReportStatus): string {
   return REPORT_STATUS_CONFIG[status].label;
 }

@@ -1,14 +1,7 @@
-// ============================================================
-// QuickCategoryRow - Accesos rápidos de categoría
-// Refactorización: Extract Component desde HomeScreen (BS-H02)
-//   + Replace Magic Number (CP-H01)
-// Antes: 44 líneas de JSX repetitivo con IDs hardcodeados
-// Ahora: Componente config-driven con array de datos
-// ============================================================
 
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
   Colors,
   FontWeight,
@@ -23,11 +16,7 @@ interface QuickCategory {
   backgroundColor: string;
 }
 
-/**
- * Configuración de categorías rápidas visibles en Home.
- * Refactorización: Replace Magic Number — los IDs y colores estaban
- * hardcodeados como '1', '2', '3', '6' y hex literals.
- */
+
 const QUICK_CATEGORIES: QuickCategory[] = [
   {
     categoryId: '1',

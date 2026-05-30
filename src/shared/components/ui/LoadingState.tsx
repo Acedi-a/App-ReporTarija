@@ -1,9 +1,6 @@
-// ============================================================
-// LoadingState - Indicador de carga centrado
-// ============================================================
 
 import React from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Colors, FontSize, Spacing } from '../../constants/theme';
 
 interface LoadingStateProps {

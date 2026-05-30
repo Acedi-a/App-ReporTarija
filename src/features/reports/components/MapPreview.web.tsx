@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadows } from '../../../shared/constants/theme';
+import React from 'react';
+import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BorderRadius, Colors, FontSize, FontWeight, Shadows, Spacing } from '../../../shared/constants/theme';
 
 interface MapPreviewProps {
   latitude: number | null;
@@ -21,7 +21,6 @@ export function MapPreview({ latitude, longitude, address, neighborhood }: MapPr
     });
   };
 
-  // OpenStreetMap embed URL
   const osmEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.003}%2C${lat - 0.003}%2C${lng + 0.003}%2C${lat + 0.003}&layer=mapnik&marker=${lat}%2C${lng}`;
 
   return (
@@ -45,7 +44,6 @@ export function MapPreview({ latitude, longitude, address, neighborhood }: MapPr
       </View>
 
       <View style={styles.mapContainer}>
-        {/* On Web we use standard iframe for OpenStreetMap */}
         <iframe
           src={osmEmbedUrl}
           style={{
@@ -55,7 +53,7 @@ export function MapPreview({ latitude, longitude, address, neighborhood }: MapPr
           }}
           title="Mapa de ubicación"
         />
-        
+
         <TouchableOpacity
           style={styles.mapOverlay}
           activeOpacity={0.85}

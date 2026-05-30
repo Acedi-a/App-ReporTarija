@@ -1,15 +1,11 @@
-// ============================================================
-// ScreenContainer - Layout base para pantallas
-// Envuelve contenido con SafeArea + ScrollView + padding
-// ============================================================
 
 import React from 'react';
 import {
-  View,
-  ScrollView,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  StyleSheet,
+  View,
   type ViewStyle,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

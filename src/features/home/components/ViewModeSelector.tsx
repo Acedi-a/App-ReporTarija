@@ -1,20 +1,14 @@
-// ============================================================
-// ViewModeSelector - Control segmentado Lista/Mapa
-// Refactorización: Extract Component desde HomeScreen (BS-H01)
-// Antes: ~50 líneas de JSX inline en HomeScreen
-// Ahora: Componente reutilizable con responsabilidad única
-// ============================================================
 
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
+  BorderRadius,
   Colors,
   FontSize,
   FontWeight,
-  Spacing,
-  BorderRadius,
   Shadows,
+  Spacing,
 } from '../../../shared/constants/theme';
 
 export type ViewMode = 'list' | 'map';
@@ -24,7 +18,6 @@ interface ViewModeSelectorProps {
   onViewModeChange: (mode: ViewMode) => void;
 }
 
-/** Configuración de las opciones del selector */
 const VIEW_MODE_OPTIONS: { mode: ViewMode; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
   { mode: 'list', icon: 'list', label: 'Lista' },
   { mode: 'map', icon: 'map', label: 'Mapa' },

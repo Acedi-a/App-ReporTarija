@@ -1,20 +1,14 @@
-// ============================================================
-// HeroNewReportCard - Tarjeta hero para crear nuevo reporte
-// Refactorización: Extract Component desde HomeScreen (BS-H01)
-// Antes: Embebido directamente en HomeScreen (~20 líneas JSX + estilos)
-// Ahora: Componente independiente con responsabilidad única
-// ============================================================
 
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
+  BorderRadius,
   Colors,
   FontSize,
   FontWeight,
-  Spacing,
-  BorderRadius,
   Shadows,
+  Spacing,
 } from '../../../shared/constants/theme';
 
 interface HeroNewReportCardProps {

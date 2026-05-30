@@ -1,25 +1,18 @@
-// ============================================================
-// MapReportPreviewCard - Tarjeta de preview de reporte en mapa
-// Refactorización: Extract Component (CO-H01)
-// Antes: Código 100% idéntico duplicado en HomeMapTab.native.tsx
-//        y HomeMapTab.web.tsx (~30 líneas JSX + ~50 líneas estilos)
-// Ahora: Componente único compartido por ambas variantes
-// ============================================================
 
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import type { Report } from '../../../shared/types';
-import { ReportStatusBadge } from '../../reports/components/ReportStatusBadge';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
+  BorderRadius,
   Colors,
   FontSize,
   FontWeight,
-  Spacing,
-  BorderRadius,
   Shadows,
+  Spacing,
 } from '../../../shared/constants/theme';
+import type { Report } from '../../../shared/types';
+import { ReportStatusBadge } from '../../reports/components/ReportStatusBadge';
 
 interface MapReportPreviewCardProps {
   report: Report;

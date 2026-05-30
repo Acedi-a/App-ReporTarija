@@ -1,18 +1,14 @@
-// ============================================================
-// Button - Componente reutilizable de botón
-// Soporta variantes: primary, secondary, outline, ghost
-// ============================================================
 
 import React from 'react';
 import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
   ActivityIndicator,
-  type ViewStyle,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
   type TextStyle,
+  type ViewStyle,
 } from 'react-native';
-import { Colors, BorderRadius, FontSize, FontWeight, Spacing } from '../../constants/theme';
+import { BorderRadius, Colors, FontSize, FontWeight, Spacing } from '../../constants/theme';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 

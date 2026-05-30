@@ -1,14 +1,4 @@
-// ============================================================
-// useHomeData - Custom Hook de negocio para la pantalla principal
-// Encapsula fetching y cálculo de estadísticas
-// ============================================================
-// Refactorizaciones aplicadas:
-//   - Dispensable: Eliminada variable totalReports (DI-H01)
-//     Se declaraba, calculaba y retornaba pero nunca se usaba
-//     en HomeScreen. Código muerto eliminado.
-// ============================================================
-
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import * as reportService from '../../../features/reports/services/reportService';
 import type { Report, ReportStatus } from '../../../shared/types';
 
@@ -21,7 +11,6 @@ const INITIAL_STATS: Record<ReportStatus, number> = {
   RECHAZADO: 0,
 };
 
-/** Cantidad de reportes recientes a mostrar en Home */
 const RECENT_REPORTS_LIMIT = 5;
 
 export function useHomeData(userId: string | undefined) {
